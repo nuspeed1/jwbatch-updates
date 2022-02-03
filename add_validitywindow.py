@@ -150,6 +150,7 @@ def update_pub_dates(assets):
         cust = meta['custom_params']
 
         # this probably already has a valid validitywindow
+        #TODO: check publish start and end dates
         if "validitywindow" in cust and ";scheme=W3C-DTF" in cust['validitywindow'] \
             and meta['publish_end_date'] and meta['publish_start_date']: continue
 

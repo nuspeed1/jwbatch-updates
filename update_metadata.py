@@ -16,17 +16,20 @@ Usage:
     python update_metadata.py -s <SECRET> -p <PROPERTY ID> -f <CSV FILE>
 """
 
-SECRET, PROP_ID = get_credentials()
 
 limits = {"result_limit": 14, "result_offset": 0}
-HEADERS = {"Accept": "application/json", "Authorization": SECRET}
+
 
 parser = ArgumentParser()
 parser.add_argument("-f", dest="file", default="", required=False, help="CSV source file.  Requires column for mediaid")
+parser = get_credentials(parser)
 args = parser.parse_args()
+SECRET = args.secret
+PROP_ID = args.propertyid
 
 csv_file = args.file
 
+HEADERS = {"Accept": "application/json", "Authorization": SECRET}
 
 def get_all_media(url, medias):
     res = requests.get(url)
@@ -86,7 +89,7 @@ def update_metadata(src, target):
                 meta[s] = src[s]
             else:
                 cust[s] = src[s]
-    
+    target['metadata']['category'] = None
     return target
 
 def push_update(media_id, payload, retry=0):
@@ -109,7 +112,7 @@ print_headers.remove("mediaid")
 
 if input(f"Replace values found in these columns? \n\t{(' | ').join(print_headers)}\n(y/n): ").lower() == "y":
     print(f'Backing up assets...')
-    assets_all, fn_backup = backup()
+    assets_all, fn_backup = backup(PROP_ID, SECRET)
     print(f'Backup in {fn_backup}')
 
     confirm = "c"

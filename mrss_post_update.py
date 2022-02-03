@@ -22,7 +22,7 @@ example:  Copy http://www.xyzcompany.com/rss/ from the top
     xmlns:dcterms="http://purl.org/dc/terms/" version="2.0">
 5. From terminal run the following command:
 USAGE:
-    python mrss_post_update.py -s <SECRET> -p <PROPERTY ID> -n "<NAMESPACE>" -m <PATH TO FILE>
+    python mrss_post_update.py -s <SECRET> -p <PROPERTY ID> -n "<NAMESPACE>" -f <PATH TO FILE>
 
 """
 parser = ArgumentParser()
@@ -391,7 +391,7 @@ def validate_mrss_data(data):
 
     valid_fields = ['actor','director', 'episodeNumber','genre','guid',
     'poster_landscape','poster_portrait','productionType','pubDate',
-    'restrictions','seasonNumber','seriesId','validitywindow']
+    'seasonNumber','seriesId','validitywindow']
 
     diff = []
     if "seriesId" not in keys:

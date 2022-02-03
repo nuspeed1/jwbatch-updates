@@ -16,15 +16,18 @@ After creating a backup, this will update each episode with their seriesCardId a
 """
 
 parser = ArgumentParser()
+parser = get_credentials(parser)
 parser.add_argument("-c", dest="create", action="store_true", help="Link series information")
 parser.add_argument("-u", dest="update", action="store_true", help="Update episodes")
 
 args = parser.parse_args()
 
+SECRET = args.secret
+PROP_ID = args.propertyid
 series_id = args.create
 is_update = args.update
 
-SECRET, SITE_ID = get_credentials(parser)
+
 HEADERS = {"Accept": "application/json", "Authorization": SECRET}
 
 CSV_FILE = "./files/episodes.csv"
@@ -42,7 +45,7 @@ def check_response(res):
         return True
 
 def create_md_backup():
-    url = f"https://api.jwplayer.com/v2/sites/{SITE_ID}/media/"
+    url = f"https://api.jwplayer.com/v2/sites/{PROP_ID}/media/"
     querystring = {"page":"3","page_length":"500","sort":"created:dsc"}
     page = 1
     pages = 10 #gets set in while loop.
@@ -164,7 +167,7 @@ def create_series_file():
 
 def update_asset(id, payload, retries=0):
     try:
-        url = f"https://api.jwplayer.com/v2/sites/{SITE_ID}/media/{id}"
+        url = f"https://api.jwplayer.com/v2/sites/{PROP_ID}/media/{id}"
         res = requests.patch(url, json=payload, headers=HEADERS)
         
         print(res.status_code)

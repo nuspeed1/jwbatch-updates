@@ -7,7 +7,7 @@ from utils import get_credentials, backup
 Create a csv report of all assets.  
 Declare report fields listed under LIST_OF_FIELDS.
 
-Usage: python create_report.py
+Usage: python create_report.py -s <SECRET> -p <PROPERTY_ID>
 """
 
 aparser = ArgumentParser()
@@ -17,7 +17,7 @@ SECRET = args.secret
 PROP_ID = args.propertyid
 
 # add list of fields here
-LIST_OF_FIELDS = ["title", "status", "episodic_landscape_url", "hosting_type"]
+LIST_OF_FIELDS = ["title", "hosting_type", "status","publish_start_date", "publish_end_date", "seasonNumber", "episodeNumber", "programName","rating"]
 
 
 limits = {"result_limit": 14, "result_offset": 0}
@@ -34,7 +34,7 @@ def get_all_media(url, medias):
     return medias
 
 def create_csv(assets):
-    f = open('./media-list.csv', "w")
+    f = open('./files/report.csv', "w")
     writer = csv.writer(f)
     header = LIST_OF_FIELDS
     header.insert(0,"mediaid")

@@ -13,15 +13,18 @@ in the csv file.  This script will look for duplicate import_guids and remove on
 Usage:
     python delete_duplicates.py -d PATH_TO_REPORT.csv -s SECRET -p PROPERTY_ID
 """
-SECRET, SITE_ID = get_credentials()
+parser = ArgumentParser()
+parser = get_credentials(parser)
+parser.add_argument("-d", dest="delete", default="", help="CSV file with files to delete")
+args = parser.parse_args()
+SECRET = args.secret
+SITE_ID = args.propertyid
 
 HEADERS = {"Accept": "application/json", "Authorization": SECRET}
 MEDIA_FILE = 'media-list.json'
 
-parser = ArgumentParser()
-parser.add_argument("-d", dest="delete", default="", help="CSV file with files to delete")
 
-args = parser.parse_args()
+
 media_list = args.delete
 
 def check_response(res):

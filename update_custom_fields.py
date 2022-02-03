@@ -19,8 +19,10 @@ LIST_OF_FIELDS = ["providerId", "mediaid", "title", "hosting_type", "status", "p
 parser = ArgumentParser()
 parser.add_argument("-d", dest="delete", default="", required=False, help="List of custom fields to delete: field,field2")
 parser.add_argument("-r", dest="rename", default="", required=False, help="List of keyname pairs to rename. <old name>=<new name>, e.g. field=field2,guid=import_guid")
-SECRET, PROP_ID = get_credentials(parser)
+parser = get_credentials(parser)
 args = parser.parse_args()
+SECRET = args.secret
+PROP_ID = args.propertyid
 
 deletes = args.delete
 renames = args.rename
