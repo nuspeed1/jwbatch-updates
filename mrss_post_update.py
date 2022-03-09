@@ -1,5 +1,7 @@
 from os.path import exists
+import sys
 import requests
+from urllib.request import urlopen
 import xml.etree.ElementTree as ET
 from utils import check_response, get_credentials, backup
 from argparse import ArgumentParser
@@ -12,18 +14,17 @@ additional thumbnails (landscape and portrait) and converts tags into custom fie
 TODO: because some MRSS feeds have TTL tokens attached to assets, this downloads thumbnails
 into the thumbnails folder and uploads it to JWPlayer from there.  
 
-1. Load a copy of the mRSS xml feed into a browser
-2. View Source and copy it's contents. *IMPORTANT - this ensures weird character conversions from the browser is not copied.
-3. Save the file in the mrss_feeds folder
-4. Open the file and search for the custom namespace at the top of the file. 
+1. Open the file and search for the custom namespace at the top of the file.  If you are xyzcompany, copy the namespace "xyzcompany".
 example:  Copy http://www.xyzcompany.com/rss/ from the top
 <rss xmlns:media="http://search.yahoo.com/mrss/"
     xmlns:xyzcompany="http://www.xyzcompany.com/rss/"
     xmlns:dcterms="http://purl.org/dc/terms/" version="2.0">
-5. From terminal run the following command:
+2. From terminal run the following command:
 USAGE:
-    python mrss_post_update.py -s <SECRET> -p <PROPERTY ID> -n "<NAMESPACE>" -f <PATH TO FILE>
-
+    python mrss_post_update.py -s <SECRET> -p <PROPERTY ID> -n "<NAMESPACE>" -f <URL TO MRSS FEED>
+    
+RENDERED:
+    python mrss_post_update.py -s SXY2818... -p HMXieu7 -n "xyzcompany" -f "https://PATH_TO_MY_MRSS_FEED.xml"
 """
 parser = ArgumentParser()
 parser = get_credentials(parser)
@@ -36,7 +37,7 @@ PROP_ID = args.propertyid
 ns = args.namespace
 mrss_file = args.mrss_file
 
-NAMESPACE = "{"+ns+"}"
+
 
 HEADERS = {"Accept": "application/json", "Authorization": SECRET}
 
@@ -372,18 +373,45 @@ def get_series_keyart(items):
             continue
     return images
 
+def parse_and_get_ns(data):
+    file = './tmp_rss.xml'
+    f = open('./tmp_rss.xml', 'w')
+    f.write(data)
+    f.close()
+    events = "start", "start-ns"
+    root = None
+    ns = {}
+    for event, elem in ET.iterparse(file, events):
+        if event == "start-ns":
+            if elem[0] in ns and ns[elem[0]] != elem[1]:
+                # NOTE: It is perfectly valid to have the same prefix refer
+                #     to different URI namespaces in different parts of the
+                #     document. This exception serves as a reminder that this
+                #     solution is not robust.    Use at your own peril.
+                raise KeyError("Duplicate prefix with different URI found.")
+            ns[elem[0]] = "%s" % elem[1]
+        elif event == "start":
+            if root is None:
+                root = elem
+    return ns
+
 def load_xml(f_path):
-    f_xml = open(f_path, "r")
-    f_txt = f_xml.read()
+    data = requests.get(f_path)
+    
+    f_txt = data.text
+
+    ns = parse_and_get_ns(f_txt)
     ## CLEAN UP FEED
+    
     f_txt = f_txt.replace("&ampamp;", "&amp;")
     f_txt = f_txt.replace("&amamp;", "&amp;")
     f_txt = f_txt.replace("<item></item>", "")
 
     tree = ET.ElementTree(ET.fromstring(f_txt))
     root = tree.getroot()
+    
     items = root.findall("./channel/item")
-    return items
+    return items, ns
 
 
 def validate_mrss_data(data):
@@ -408,9 +436,17 @@ def validate_mrss_data(data):
         return False
 
 def start(f_path):
-    items = load_xml(f_path)
+    items, xml_namespaces = load_xml(f_path)
+
+    namespace = ""
+    if ns in xml_namespaces:
+        namespace = xml_namespaces[ns]
+    else:
+        sys.exit(f"Namespace in MRSS feed not found. : {f_path}")
+
+    NAMESPACE = "{"+namespace+"}"
     
-    errors = open('errors.txt', "w+")
+    # errors = open('errors.txt', "w+")
     count = 1
     
     series_keyart = get_series_keyart(items)
@@ -483,6 +519,6 @@ def start(f_path):
 
         count+=1
 
-    errors.close()
+    # errors.close()
 
 start(mrss_file)
