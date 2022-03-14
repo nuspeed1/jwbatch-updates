@@ -95,43 +95,44 @@ def start():
     print("##############################")
 
 
-    if input(f"Continue? y/n: ").lower() == "y": 
-        confirm = "c"
-        for item in medias:
-            #check for valid content url
-            media_id = ""
+    # if input(f"Continue? y/n: ").lower() == "y": 
+        # confirm = "c"
+    for item in medias:
+        #check for valid content url
+        media_id = ""
 
-            try:
-                print(f"----------ITEM----------{count}")
+        try:
+            print(f"----------ITEM----------{count}")
 
-                media_id = item['id']
+            media_id = item['id']
+            
+            print(f'  processing.... media guid:{media_id}')
+
+            # select episode thumbnail
+            episodic_url = update_episodic_thumbail(media_id)
+            
+            item['metadata']['custom_params']['episodic_landscape_url'] = episodic_url
+
+            # if confirm == "c":
+            #     confirm = input(f"Confirm the above update.\nType in an option to\n\tContinue (c)\n\tExit (x)\n\tProcess All (a)\n(c,x,a):").lower()
+
+            #     if confirm not in ["c","x","a"]: confirm == "x"
                 
-                print(f'  processing.... media guid:{media_id}')
 
-                # select episode thumbnail
-                episodic_url = update_episodic_thumbail(media_id)
-                
-                item['metadata']['custom_params']['episodic_landscape_url'] = episodic_url
+            # if confirm in ["c","a"]: update_asset(item)
 
-                if confirm == "c":
-                    confirm = input(f"Confirm the above update.\nType in an option to\n\tContinue (c)\n\tExit (x)\n\tProcess All (a)\n(c,x,a):").lower()
+            # if confirm == "x": sys.exit("Exiting...")
+            update_asset(item)
 
-                    if confirm not in ["c","x","a"]: confirm == "x"
-                    
+        except Exception as e:
+            print(e)
+            print(f"\n-------------------------------------------------\n")
+            print(f"mediaId: {media_id}")
+            print(str(e))
+            print("###ELEMENT ERROR###")
+            print(str(e))
+            break
 
-                if confirm in ["c","a"]: update_asset(item)
-
-                if confirm == "x": sys.exit("Exiting...")
-
-            except Exception as e:
-                print(e)
-                print(f"\n-------------------------------------------------\n")
-                print(f"mediaId: {media_id}")
-                print(str(e))
-                print("###ELEMENT ERROR###")
-                print(str(e))
-                break
-
-            count+=1
+        count+=1
 
 start()
