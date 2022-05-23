@@ -3,6 +3,7 @@ import time
 import csv
 import json
 import requests
+from pprint import pprint
 from argparse import ArgumentParser
 from datetime import datetime
 
@@ -11,12 +12,8 @@ https://poc.jwplayer.com/app/Z5ycOQVw/
 """
 
 def get_credentials(parser):
-    # parser = ArgumentParser()
     parser.add_argument("-p", dest="propertyid", default="", help="Property ID")
     parser.add_argument("-s", dest="secret", default="", help="Secret key")
-    # args = parser.parse_args()
-    # secret = args.secret
-    # prop = args.propertyid
     
     return parser
 
@@ -65,6 +62,9 @@ def backup(SITE_ID, SECRET):
         querystring['page_length'] = 500
         response = requests.request("GET", url, headers=HEADERS, params=querystring)
         res = response.json()
+        
+        if "errors" in res: break
+
         page_length = res['page_length']
         page = res['page']
         total = res['total']
