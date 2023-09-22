@@ -32,5 +32,7 @@ Install requirements
 > $ pip install -r requirements.txt
 > ```
 
+## Make sure a ./files directory exists at the same level as all scripts.  This is where generated files are stored. 
+
 Now you are ready to use any of the scripts.  Read instructions at the top of each file to usage each script. 
 Keep in mind all scripts require the utils.py file.  
